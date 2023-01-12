@@ -8,6 +8,11 @@ Level 1 : Authenticating with username and password.
         password in plain text is really dangerous.
 
 Level 2 : Database encryption. 
-        use mongoose.encryption package. it can encrypt and Authenticate.
-        
+        use mongoose.encryption package. it can encrypt and Authenticate. Data in database
+        is encrypted now but still, we have hardcoded the secret key in our app.js. So, if
+        someone hacks into app.js and aquires our key, database decryption will be supereasy.
+
+
+
+
 

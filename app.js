@@ -37,9 +37,6 @@ const secret = "ilovemlifeverymuch.";
 userSchema.plugin(encrypt , {secret:secret , encryptedField : ['password']});
 
 
-const User = new mongoose.model("User" , userSchema);
-
-
 app.get("/" , (req , res)=>{
     res.render("home");
 });
@@ -67,7 +64,6 @@ app.post("/register", (req , res)=>{
 app.post("/login", (req , res)=>{
     const email = req.body.email;
     const password = req.body.password;
-    
     User.findOne({ email : email } , (error , result)=>{
         if(!error){
             if(result == null){
@@ -77,6 +73,7 @@ app.post("/login", (req , res)=>{
                     res.render("secrets");
                 }else{
                     alert("wrong password");
+                    console.log("here");
                     res.redirect("/login");
                 }
             }
