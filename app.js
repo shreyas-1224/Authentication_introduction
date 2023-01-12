@@ -1,9 +1,13 @@
+// configuring enviornment variables.
+require('dotenv').config()
+
 const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const alert = require("alert");
 const encrypt = require("mongoose-encryption");
+
 
 
 const app = express();
@@ -33,9 +37,9 @@ const userSchema = new mongoose.Schema({
 });
 
 // encryption
-const secret = "ilovemlifeverymuch.";
-userSchema.plugin(encrypt , {secret:secret , encryptedField : ['password']});
+userSchema.plugin(encrypt , {secret: process.env.SECRET , encryptedField : ['password']});
 
+const User = new mongoose.model("User" , userSchema);
 
 app.get("/" , (req , res)=>{
     res.render("home");
