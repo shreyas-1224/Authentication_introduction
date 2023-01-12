@@ -6,3 +6,8 @@ Level 1 : Authenticating with username and password.
         of security.
         This is the most unsecure way of handling the data. also, storing user's email and
         password in plain text is really dangerous.
+
+Level 2 : Database encryption. 
+        use mongoose.encryption package. it can encrypt and Authenticate.
+        
+
