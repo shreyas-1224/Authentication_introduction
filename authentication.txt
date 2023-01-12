@@ -2,3 +2,7 @@ task : secrets.ejs is the page we need to secure. i.e : we cant let users view o
        this page without their verification or sign-up.
 
 Level 1 : Authenticating with username and password.
+        create a user database and then check email with password. This is lowest level 
+        of security.
+        This is the most unsecure way of handling the data. also, storing user's email and
+        password in plain text is really dangerous.
