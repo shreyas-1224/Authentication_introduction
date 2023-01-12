@@ -1,0 +1,4 @@
+task : secrets.ejs is the page we need to secure. i.e : we cant let users view or use
+       this page without their verification or sign-up.
+
+Level 1 : Authenticating with username and password.
