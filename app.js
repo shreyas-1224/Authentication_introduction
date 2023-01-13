@@ -1,13 +1,13 @@
 // configuring enviornment variables.
-require('dotenv').config()
+//require('dotenv').config()
 
 const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const alert = require("alert");
-const encrypt = require("mongoose-encryption");
-
+//const encrypt = require("mongoose-encryption");
+const md5 = require("md5");
 
 
 const app = express();
@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // encryption
-userSchema.plugin(encrypt , {secret: process.env.SECRET , encryptedField : ['password']});
+// userSchema.plugin(encrypt , {secret: process.env.SECRET , encryptedField : ['password']});
 
 const User = new mongoose.model("User" , userSchema);
 
@@ -55,11 +55,10 @@ app.get("/register" , (req , res)=>{
 
 
 app.post("/register", (req , res)=>{
-    const email = req.body.email;
-    const password = req.body.password;
+
     const userDocument = new User({
-        email : email,
-        password : password
+        email : req.body.email,
+        password : md5(req.body.password)
     });
     userDocument.save();
     res.redirect("login");
@@ -67,7 +66,7 @@ app.post("/register", (req , res)=>{
 
 app.post("/login", (req , res)=>{
     const email = req.body.email;
-    const password = req.body.password;
+    const password = md5(req.body.password);
     User.findOne({ email : email } , (error , result)=>{
         if(!error){
             if(result == null){
@@ -76,8 +75,6 @@ app.post("/login", (req , res)=>{
                 if(result.password === password){
                     res.render("secrets");
                 }else{
-                    alert("wrong password");
-                    console.log("here");
                     res.redirect("/login");
                 }
             }

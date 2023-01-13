@@ -12,6 +12,15 @@ Level 2 : Database encryption.
         is encrypted now but still, we have hardcoded the secret key in our app.js. So, if
         someone hacks into app.js and aquires our key, database decryption will be supereasy.
 
+Level 3 : Enviornment variable.
+          create a .env file and save key in that file and then use  process.env.key in code.
+          dont upload that .env file on github :) 
+        
+Level 4 : Hashing password.
+          enviornment variables are strong but still not safest option. Thus, we use hash function
+          cause hash function can not be decoded easily. for ex: 2ms are required for forward Hashing
+          while 2 years for backword hashing.
+          use npm md5 module
 
 
 
