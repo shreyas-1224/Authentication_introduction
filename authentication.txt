@@ -27,5 +27,71 @@ Level % : Added bcrypt module.
           
 
 
+_________________________________________________________________________________________________________
 
+About cookies and session id:
+modules imported are : passport , passport-local
+
+// for cookies and session.
+app.set('trust proxy', 1) // trust first proxy
+app.use(session({
+  secret: 'i love my life very much.',                  
+  resave: false,
+  saveUninitialized: false,
+}));
+
+userSchema.plugin(passportLocalMongoose);
+-> hash and salt the password. and save users. 
+
+USE below code below the mongoose model. Our model name was User
+
+// use static authenticate method of model in LocalStrategy
+passport.use(User.createStrategy());
+--> create a strategy to authenticate the user. then serialise and deserialise the cookie.
+
+// use static serialize and deserialize of model for passport session support
+passport.serializeUser(User.serializeUser());                   // stuff the data in cookie.
+passport.deserializeUser(User.deserializeUser());               // get the data from cookie.
+
+* register a user : 
+   User.register() 
+   --> comes from passportLocalMongoose. Because of this dont have to interact directly with mongoose.
+   we can avoid creating new user and saving data. This package does that for us.     
+
+app.post("/register", (req , res)=>{
+    // make sure in ejs/html form also you use the same tern "username" and "password".
+    // this automatically insert mongodb document in our collection.
+    User.register({username : req.body.username} , req.body.password , (error , user)=>{
+        if(error){
+            console.log(error);
+            res.redirect("/register");
+        }else{
+            passport.authenticate("local")(req , res , ()=>{            // uses local strategy to authenticate
+                res.redirect("/secrets");                               // now we are authenticated.
+            });
+        }
+    });
+
+
+    in app.get("/secrets" , (req , res)=>){
+        // check if we are authenticated or not.
+        if(req.isAuthenticated()){
+                res.render("secrets");
+        }else{
+                res.redirect("/login");
+        }
+    }
+});
+
+
+// login using password.
+use log in feature from passport. create username and passport object.
+const user = ...
+req.login(user , (err)=>{
+        if(!err){
+                passport.authenticate("local)(req , res , ()=>{
+                        res.redirect("secrets);
+                });
+        }
+} );
 
