@@ -1,41 +1,35 @@
-// configuring enviornment variables.
-//require('dotenv').config()
+require('dotenv').config()
 
 const express = require("express");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const saltRounds = 10;
 const session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
-const e = require("express");
-const { serializeUser, deserializeUser } = require("passport");
+const findOrCreate = require('mongoose-findorcreate')
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-//const encrypt = require("mongoose-encryption");
-//const md5 = require("md5");
-// const bcrypt = require('bcrypt');
+
 
 const app = express();
 
-// setting up view and body-parser
-app.use(express.static("public"));
-app.set("view engine" , "ejs");
-app.use(bodyParser.urlencoded({extended: true}));
-
-
-// for cookies and session.
 app.set('trust proxy', 1) // trust first proxy
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(session({
-  secret: 'i love my life very much.',
-  resave: false,
-  saveUninitialized: false,
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false,
 }));
+app.use(passport.initialize());         
+app.use(passport.session());             
 
-app.use(passport.initialize());         // set passport.
-app.use(passport.session());            // use passport to initialize session.    
 
-// setting up the database
+app.set('trust proxy', 1) 
+app.set("view engine" , "ejs");
+
+
 mongoose.set('strictQuery', false);
 mongoose.connect('mongodb://127.0.0.1:27017/usersdb',
 {
@@ -53,21 +47,15 @@ const userSchema = new mongoose.Schema({
     password : String
 });
 
-// encryption
-// userSchema.plugin(encrypt , {secret: process.env.SECRET , encryptedField : ['password']});
+
 userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
+
+
 const User = new mongoose.model("User" , userSchema);
 
-// use static authenticate method of model in LocalStrategy
 passport.use(User.createStrategy());
 
-// use static serialize and deserialize of model for passport session support
-//passport.serializeUser(User.serializeUser());
-//passport.deserializeUser(User.deserializeUser());
-
-
-
-//another way to serializeUser and deserializeUser(best way actually.)
 passport.serializeUser(function(user, done) {
     done(null, user);
      
@@ -78,8 +66,34 @@ passport.deserializeUser(function(user, done) {
 });
 
 
+passport.use(new GoogleStrategy({
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: "http:localhost:3000/auth/google/secrets",
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    console.log(profile);
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+
+
 app.get("/" , (req , res)=>{
     res.render("home");
+});
+
+app.get('/auth/google',
+    passport.authenticate('google', { scope: ["profile"] })
+);
+
+app.get('/auth/google/secrets', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/secrets');
 });
 
 app.get("/login" , (req , res)=>{
@@ -93,6 +107,14 @@ app.get("/register" , (req , res)=>{
 app.get("/secrets" , (req , res)=>{
     if(req.isAuthenticated()){
         res.render("secrets");
+    }else{
+        res.redirect("/login");
+    }
+});
+
+app.get("/submit" , (req , res)=>{
+    if(req.isAuthenticated()){
+        res.render("submit");
     }else{
         res.redirect("/login");
     }
@@ -133,11 +155,9 @@ app.post("/login", (req , res)=>{
             res.redirect("/login");
         }else{
             passport.authenticate("local" ,  { failureRedirect: '/login' })(req , res , ()=>{
-                //console.log(req.session.passport);
                 res.redirect("/secrets");
             }); 
-            // if authentication fails
-            //res.redirect("/login");   
+
         }
     });
 });
