@@ -70,7 +70,8 @@ passport.use(User.createStrategy());
 //another way to serializeUser and deserializeUser(best way actually.)
 passport.serializeUser(function(user, done) {
     done(null, user);
-  });
+     
+});
   
 passport.deserializeUser(function(user, done) {
     done(null, user);
@@ -113,18 +114,18 @@ app.post("/register", (req , res)=>{
 });
 
 app.post("/login", (req , res)=>{
-    
     const userdata = new User({
         username: req.body.username,
         password: req.body.password
     });
-
+    
     req.login(userdata , (err)=>{
         if(err){
             console.log(err);
             res.redirect("/login");
         }else{
             passport.authenticate("local" ,  { failureRedirect: '/login' })(req , res , ()=>{
+                console.log(req.session.passport);
                 res.redirect("/secrets");
             }); 
             // if authentication fails
