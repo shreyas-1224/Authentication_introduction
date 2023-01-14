@@ -113,6 +113,14 @@ app.post("/register", (req , res)=>{
     
 });
 
+
+app.get('/logout', function(req, res, next){
+    req.logout(function(err) {
+      if (err) { return next(err); }
+      res.redirect('/');
+    });
+});
+
 app.post("/login", (req , res)=>{
     const userdata = new User({
         username: req.body.username,
@@ -125,7 +133,7 @@ app.post("/login", (req , res)=>{
             res.redirect("/login");
         }else{
             passport.authenticate("local" ,  { failureRedirect: '/login' })(req , res , ()=>{
-                console.log(req.session.passport);
+                //console.log(req.session.passport);
                 res.redirect("/secrets");
             }); 
             // if authentication fails
